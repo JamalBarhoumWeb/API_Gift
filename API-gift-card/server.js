@@ -5,7 +5,7 @@ require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const TAP_BEARER_TOKEN = process.env.TAP_BEARER_TOKEN ;
+const TAP_BEARER_TOKEN = process.env.TAP_BEARER_TOKEN;
 
 
 app.use(express.json());
@@ -210,67 +210,7 @@ const addRecord = async (data) => {
 
 
 // Function to make API Request
-// const makeApiRequest = async (path) => {
-//   console.log(`
-//     makeApiRequest
-//     => 
-//         => 
-//             =>
-//     `);
 
-//   console.log(`https://www.zohoapis.com${path}`);
-
-//   try {
-
-//     const response = await fetch(`https://www.zohoapis.com${path}`, {
-//       method: "GET",
-//       headers: {
-//         "Authorization": `Zoho-oauthtoken ${accessToken}`,
-//       },
-//     });
-
-
-
-//     return response?.json();;
-//   } catch (error) {
-//     if (error.response && error.response.status === 401) {
-//       // Access Token expired, refresh it
-//       console.log('Access Token expired. Refreshing...');
-//       await refreshAccessToken();
-//       return makeApiRequest(path); // Retry the request
-//     } else {
-//       throw new Error(`API Error: ${error.message}`);
-//     }
-//   }
-// };
-
-
-// Example API Request
-// (async () => {
-//   try {
-//     if (!accessToken) {
-//       console.log('Refreshing Access Token...');
-//       await refreshAccessToken();
-//     }
-
-//     // إعداد أسماء التطبيق والتقرير
-//     const accountOwnerName = 'atoolco'; // Account Owner Name
-//     const appLinkName = 'test-app'; // App Link Name
-//     const reportLinkName = 'Test_Pey_API_Report'; // Report Link Name
-//     const URL = "www.zohoapis.com"
-//     // URL النهائي
-//     // const apiUrl = `/creator/v2.1/data/${accountOwnerName}/${appLinkName}/report/${reportLinkName}`;
-//     const test = `/creator/v2.1/data/${accountOwnerName}/${appLinkName}/report/${reportLinkName}`
-//     // إرسال الطلب
-//     console.log(`Generated URL: https://www.zohoapis.com/creator/v2.1/data/${accountOwnerName}/${appLinkName}/report/${reportLinkName}`);
-
-//     const response = await makeApiRequest(test);
-//     console.log('API Response:', response.data[0]);
-
-//   } catch (error) {
-//     console.error('Error:', error.message);
-//   }
-// })();
 
 // https://www.zohoapis.com/creator/v2.1/data/atoolco/test-app/report/Test_Pey_API_Report ????? =>>  postman ok success 
 
@@ -279,7 +219,82 @@ const addRecord = async (data) => {
 
 
 
+const findDataZoho = (tapId) => {
+  const makeApiRequest = async (path) => {
+    console.log(`
+      makeApiRequest
+      => 
+          => 
+              =>
+      `);
 
+    console.log(`https://www.zohoapis.com${path}`);
+
+    try {
+
+      const response = await fetch(`https://www.zohoapis.com${path}`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Zoho-oauthtoken ${accessToken}`,
+        },
+      });
+
+
+
+      return response?.json();;
+    } catch (error) {
+      if (error.response && error.response.status === 401) {
+        // Access Token expired, refresh it
+        console.log('Access Token expired. Refreshing...');
+        await refreshAccessToken();
+        return makeApiRequest(path); // Retry the request
+      } else {
+        throw new Error(`API Error: ${error.message}`);
+      }
+    }
+  };
+
+
+  // Example API Request
+  return (async () => {
+    try {
+      if (!accessToken) {
+        console.log('Refreshing Access Token...');
+        await refreshAccessToken();
+      }
+
+      // إعداد أسماء التطبيق والتقرير
+      const accountOwnerName = 'atoolco'; // Account Owner Name
+      const appLinkName = 'test-app'; // App Link Name
+      const reportLinkName = 'Test_Pey_API_Report'; // Report Link Name
+      const URL = "www.zohoapis.com"
+      // URL النهائي
+      // const apiUrl = `/creator/v2.1/data/${accountOwnerName}/${appLinkName}/report/${reportLinkName}`;
+      const test = `/creator/v2.1/data/${accountOwnerName}/${appLinkName}/report/${reportLinkName}`
+      // إرسال الطلب
+      console.log(`Generated URL: https://www.zohoapis.com/creator/v2.1/data/${accountOwnerName}/${appLinkName}/report/${reportLinkName}`);
+
+      const response = await makeApiRequest(test);
+      console.log('API Response:', response.data);
+
+
+      const dataZohoFind = response?.data?.find((elm, index) => {
+        return elm.tapID == tapId
+      })
+      console.log("dataZohoFind => ");
+
+
+      console.log(dataZohoFind?.tapID);
+
+      return dataZohoFind
+
+
+
+    } catch (error) {
+      console.error('Error:', error.message);
+    }
+  })();
+}
 
 
 
@@ -303,6 +318,14 @@ const addRecord = async (data) => {
 
 app.get("/check-payment/:id", async (req, res) => {
 
+
+
+
+
+
+
+
+
   console.log(req.params);
 
   const rawData = req.params.id;
@@ -315,7 +338,25 @@ app.get("/check-payment/:id", async (req, res) => {
   const parsedDataGiftdata = JSON.parse(dataGiftdata);
   console.log(parsedDataGiftdata);
 
+  if (tapId) {
 
+    const zohoDataFindIDTAP = await findDataZoho(tapId)
+
+    console.log("zohoDataFindIDTAP");
+
+    console.log(zohoDataFindIDTAP);
+
+    if (zohoDataFindIDTAP?.tapID == tapId & zohoDataFindIDTAP?.Single_Line1 == "CAPTURED") {
+      res.status(200).json({
+        status: false,
+        details: "Already exists in Zoho, and the operation is successful",
+      });
+      console.log("Already exists in Zoho, and the operation is successful");
+
+
+      return
+    }
+  }
 
 
 
@@ -327,35 +368,7 @@ app.get("/check-payment/:id", async (req, res) => {
       },
     });
     console.log(" =>>>>>>>>>>>>> res payment CAPTURED data ");
-   
-    if (response?.data && parsedDataGiftdata) {
-
-      const data = [
-        {
-          Currency1: parsedDataGiftdata.priceSelected,
-          PhoneSender: parsedDataGiftdata?.dataSenderNumber,
-          Phone_Number: parsedDataGiftdata?.dataRecipientNumber,
-          NameSender: {
-            prefix: "",
-            last_name: "",
-            suffix: "",
-            first_name: parsedDataGiftdata?.dataSenderName,
-            zc_display_value: parsedDataGiftdata?.dataSenderName, // القيمة المعروضة
-          },
-          Name: {
-            prefix: "",
-            last_name: "Smith",
-            suffix: "",
-            first_name: parsedDataGiftdata.dataRecipientName,
-            zc_display_value: parsedDataGiftdata.dataRecipientName, // القيمة المعروضة
-          },
-          Single_Line1:response?.data?.status,
-          Single_Line2:parsedDataGiftdata?.MessageSend || "لا يوجد",
-          Single_Line3:parsedDataGiftdata?.citiesFormatted || "لا يوجد",
-          Single_Line4:parsedDataGiftdata?.TimeFormatted,
-          Single_Line5:parsedDataGiftdata?.DateFormatted,
-        },
-      ];
+    console.log(response);
 
 
 
@@ -365,17 +378,66 @@ app.get("/check-payment/:id", async (req, res) => {
 
 
 
+    if (response?.data && parsedDataGiftdata && tapId) {
 
 
+      const zohoDataFindIDTAP = await findDataZoho(tapId)
 
+      console.log("zohoDataFindIDTAP");
 
-      addRecord(data)
-        .then((response) => {
-          console.log("Record added successfully:", response);
-        })
-        .catch((error) => {
-          console.error("Error adding record:", error.message);
+      console.log(zohoDataFindIDTAP);
+
+      if (zohoDataFindIDTAP?.tapID == tapId & zohoDataFindIDTAP?.Single_Line1 == "CAPTURED") {
+        res.status(200).json({
+          status: response?.data.status,
+          details: response?.data,
         });
+        console.log("Already exists in Zoho, and the operation is successful");
+
+
+        return
+      } else {
+        const data = [
+          {
+            tapID: tapId,
+            Currency1: parsedDataGiftdata.priceSelected,
+            PhoneSender: parsedDataGiftdata?.dataSenderNumber,
+            Phone_Number: parsedDataGiftdata?.dataRecipientNumber,
+            NameSender: {
+              prefix: "",
+              last_name: "",
+              suffix: "",
+              first_name: parsedDataGiftdata?.dataSenderName,
+              zc_display_value: parsedDataGiftdata?.dataSenderName, // القيمة المعروضة
+            },
+            Name: {
+              prefix: "",
+              last_name: "Smith",
+              suffix: "",
+              first_name: parsedDataGiftdata.dataRecipientName,
+              zc_display_value: parsedDataGiftdata.dataRecipientName, // القيمة المعروضة
+            },
+            Single_Line1: response?.data?.status,
+            Single_Line2: parsedDataGiftdata?.MessageSend || "لا يوجد",
+            Single_Line3: parsedDataGiftdata?.citiesFormatted || "لا يوجد",
+            Single_Line4: parsedDataGiftdata?.TimeFormatted,
+            Single_Line5: parsedDataGiftdata?.DateFormatted,
+          },
+        ];
+
+
+
+        addRecord(data)
+          .then((response) => {
+            console.log("Record added successfully:", response);
+          })
+          .catch((error) => {
+            console.error("Error adding record:", error.message);
+          });
+        console.log("create in zoho creator successful");
+      }
+
+
 
     }
     // إرسال حالة الدفع للعميل
