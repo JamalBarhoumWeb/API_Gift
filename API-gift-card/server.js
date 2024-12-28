@@ -16,13 +16,13 @@ app.post("/process-payment", async (req, res) => {
   const { token } = req.body;
 
 
-  console.log(` 
+  // console.log(` 
       
-      data for need =>>>>>>>>>>>
+  //     data for need =>>>>>>>>>>>
 
-      req.body.data => => => 
+  //     req.body.data => => => 
 
-      `);
+  //     `);
 
   // console.log(req.body.data);
 
@@ -111,7 +111,7 @@ const refreshAccessToken = async () => {
 
     if (response.data.access_token) {
       accessToken = response.data.access_token; // Update Access Token
-      console.log('Access Token refreshed:', accessToken);
+      // console.log('Access Token refreshed:', accessToken);
       return accessToken;
     } else {
       throw new Error(`Failed to refresh Access Token: ${response.data.error_description || 'Unknown error'}`);
@@ -221,14 +221,14 @@ const addRecord = async (data) => {
 
 const findDataZoho = (tapId) => {
   const makeApiRequest = async (path) => {
-    console.log(`
-      makeApiRequest
-      => 
-          => 
-              =>
-      `);
+    // console.log(`
+    //   makeApiRequest
+    //   => 
+    //       => 
+    //           =>
+    //   `);
 
-    console.log(`https://www.zohoapis.com${path}`);
+    // console.log(`https://www.zohoapis.com${path}`);
 
     try {
 
@@ -272,19 +272,19 @@ const findDataZoho = (tapId) => {
       // const apiUrl = `/creator/v2.1/data/${accountOwnerName}/${appLinkName}/report/${reportLinkName}`;
       const test = `/creator/v2.1/data/${accountOwnerName}/${appLinkName}/report/${reportLinkName}`
       // إرسال الطلب
-      console.log(`Generated URL: https://www.zohoapis.com/creator/v2.1/data/${accountOwnerName}/${appLinkName}/report/${reportLinkName}`);
+      // console.log(`Generated URL: https://www.zohoapis.com/creator/v2.1/data/${accountOwnerName}/${appLinkName}/report/${reportLinkName}`);
 
       const response = await makeApiRequest(test);
-      console.log('API Response:', response.data);
+      // console.log('API Response:', response.data);
 
 
       const dataZohoFind = response?.data?.find((elm, index) => {
         return elm.tapID == tapId
       })
-      console.log("dataZohoFind => ");
+      // console.log("dataZohoFind => ");
 
 
-      console.log(dataZohoFind?.tapID);
+      // console.log(dataZohoFind?.tapID);
 
       return dataZohoFind
 
@@ -326,7 +326,7 @@ app.get("/check-payment/:id", async (req, res) => {
 
 
 
-  console.log(req.params);
+  // console.log(req.params);
 
   const rawData = req.params.id;
 
@@ -336,7 +336,7 @@ app.get("/check-payment/:id", async (req, res) => {
   const tapId = params.get("tapId");
   const dataGiftdata = params.get("dataGiftdata");
   const parsedDataGiftdata = JSON.parse(dataGiftdata);
-  console.log(parsedDataGiftdata);
+  // console.log(parsedDataGiftdata);
 
   if (tapId) {
 
@@ -348,7 +348,7 @@ app.get("/check-payment/:id", async (req, res) => {
 
     if (zohoDataFindIDTAP?.tapID == tapId & zohoDataFindIDTAP?.Single_Line1 == "CAPTURED") {
       res.status(200).json({
-        status: false,
+        status: "CAPTURED",
         details: "Already exists in Zoho, and the operation is successful",
       });
       console.log("Already exists in Zoho, and the operation is successful");
