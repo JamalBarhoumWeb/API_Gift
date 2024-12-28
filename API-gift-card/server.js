@@ -346,10 +346,20 @@ app.get("/check-payment/:id", async (req, res) => {
 
     console.log(zohoDataFindIDTAP);
 
-    if (zohoDataFindIDTAP?.tapID == tapId & zohoDataFindIDTAP?.Single_Line1 == "CAPTURED") {
+    if (zohoDataFindIDTAP?.tapID == tapId && zohoDataFindIDTAP?.Single_Line1 == "CAPTURED") {
       res.status(200).json({
         status: "CAPTURED",
         details: "Already exists in Zoho, and the operation is successful",
+      });
+      console.log("Already exists in Zoho, and the operation is successful");
+
+
+      return
+    }
+   else if (zohoDataFindIDTAP?.tapID == tapId && zohoDataFindIDTAP?.Single_Line1 == "DECLINED") {
+      res.status(200).json({
+        status: "DECLINED",
+        details: "DECLINED data",
       });
       console.log("Already exists in Zoho, and the operation is successful");
 
